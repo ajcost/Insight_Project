@@ -10,7 +10,7 @@
 
  year="${F:1:4}"
  
- spark-submit --class edu.upenn.ajcost.CompressionToHDFS.App --master spark://ip-10-0-0-10:7077 --executor-memory 14G --driver-memory 14G CompressiontoHDFS-0.0.1-SNAPSHOT-jar-with-dependencies.jar "RS$F" "RC$F" "hdfs://ip-10-0-0-10:9000/reddit_data/$year/"
+ spark-submit --class edu.upenn.ajcost.CompressionToHDFS.App --master spark://ip-10-0-0-9:7077 --executor-memory 14G --driver-memory 14G CompressiontoHDFS-0.0.1-SNAPSHOT-jar-with-dependencies.jar "RS$F" "RC$F" "hdfs://ip-10-0-0-9:9000/reddit_data/$year/"
 
  echo "Stored in HDFS "
  hadoop fs -ls /reddit_data/
