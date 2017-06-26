@@ -1,5 +1,20 @@
 package edu.upenn.ajcost.SparkGraphComputation;
 
+/*****************************
+*
+* @author adamcostarino
+*
+* Description : Computes the PageRank of users from an input file
+*               in edgelist format. The page ranks from each month
+*               are averaged over the entire year. Null values are 
+*               not registered as 0 and therefore do not affect the
+*               ultimate PageRank calculation.
+*
+* File Structure: 
+* [username]  [neighbor username]
+*
+******************************/
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -24,17 +39,19 @@ import com.google.common.collect.Iterables;
 import scala.Tuple2;
 import scala.collection.JavaConversions;
 
-/**
- * Computes the PageRank of usernames from an input file:
- * 
- * [username]  [neighbor username]
- * 
- * where strings are separated by spaces.
- * 
- */
+
 public final class App {
   private static final Pattern SPACES = Pattern.compile("\\s+");
 
+  /**
+  *
+  * Description : Static method that takes two Doubles and returns the sum
+  *
+  * @a Double : Value to be added
+  * @b Double : Value to be added
+  * @return Double : the sum of the inputs
+  *
+  **/
   private static class Sum implements Function2<Double, Double, Double> {
     @Override
     public Double call(Double a, Double b) {
@@ -42,6 +59,17 @@ public final class App {
     }
   }
   
+  /**
+  *
+  * Description : Peforms PageRank algorithm for a specified number of iterations
+  *
+  * @filename String : the path to the input edgelist file in String representation
+  * @spark SparkSession : current SparkSession instance
+  * @repetitions Integer : the number of time the PageRank algorithm is to repeat
+  * @monthString String : represents what the column will be called
+  *
+  **/
+
   public static Dataset<Row> calculatePageRank(String filename, SparkSession spark, int repetitions, String monthString) {
 		JavaRDD<String> lines = spark.read().textFile(filename).javaRDD();
 
@@ -85,30 +113,40 @@ public final class App {
 		return ranksDF;	
 	}
   
+  /**
+  *
+  * Description : Main
+  *
+  * @args[0]-args[11] Strings : the paths to the input edgelist files in String representation
+  * @args[12] String : the year of the PageRank calculation
+  * @args[13] String : the path to the output file in String representation -> parquet file format
+  *
+  **/
+  
   public static void main(String[] args) throws Exception {
     SparkSession spark = SparkSession
       .builder()
       .appName("JavaPageRank")
       .getOrCreate();
     
-    
     Dataset<Row> pageranks = calculatePageRank(args[0], spark, 20, "0");
-    
     String[] columnjoins = new String[]  { "name" };
-    
+
+    // Iteratively calculate PageRanks for all twelve months in a single year
     for (int i = 1; i < 12; i++) {
         Dataset<Row> pageranksAdd = calculatePageRank(args[i], spark, 20, i + "");
     	pageranks = pageranks.join(pageranksAdd,
     			JavaConversions.asScalaBuffer(new ArrayList<String>(Arrays.asList(columnjoins))), "outer");
         pageranks.show();
     }
-    
+
+    // Specify the new Row encoding
     StructType structType = new StructType();
     structType = structType.add("name", DataTypes.StringType, true);
     structType = structType.add("average_" + args[12], DataTypes.DoubleType, true);
-
     ExpressionEncoder<Row> encoder = RowEncoder.apply(structType);
     
+    // Map down the dataset by averaging the PageRanks for each user -> pseudo-iterative calculation
     pageranks = pageranks.map(
     		new MapFunction<Row, Row>() {
 				@Override
