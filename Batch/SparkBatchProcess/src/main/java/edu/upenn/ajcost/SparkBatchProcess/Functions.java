@@ -1,4 +1,13 @@
-package edu.upenn.ajcost.SparkJsonParser;
+package edu.upenn.ajcost.SparkBatchProcess;
+
+/*****************************
+ * 
+ * @author adamcostarino
+ *
+ * Description : These static functions build the edge list files,
+ *               the subreddit adjacencies, and the user subreddit posts.
+ *
+ ******************************/
 
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.function.Function2;
@@ -6,12 +15,6 @@ import org.apache.spark.api.java.function.MapFunction;
 import org.apache.spark.api.java.function.PairFunction;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Encoders;
-
-/*****************************
- * 
- * @author adamcostarino
- *
- ******************************/
 
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
@@ -96,7 +99,6 @@ public class Functions {
         });
 		
     	return finalAdjacencies;
-    	
 	}
 	
 	/**
@@ -134,7 +136,7 @@ public class Functions {
     					return one;
             }
         });
-		
+
 		return finalTable;
 	}
 }

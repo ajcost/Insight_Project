@@ -69,7 +69,6 @@ public final class App {
   * @monthString String : represents what the column will be called
   *
   **/
-
   public static Dataset<Row> calculatePageRank(String filename, SparkSession spark, int repetitions, String monthString) {
 		JavaRDD<String> lines = spark.read().textFile(filename).javaRDD();
 
@@ -122,7 +121,6 @@ public final class App {
   * @args[13] String : the path to the output file in String representation -> parquet file format
   *
   **/
-  
   public static void main(String[] args) throws Exception {
     SparkSession spark = SparkSession
       .builder()

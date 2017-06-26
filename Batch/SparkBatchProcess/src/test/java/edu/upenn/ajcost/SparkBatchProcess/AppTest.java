@@ -1,4 +1,4 @@
-package edu.upenn.ajcost.SparkJsonParser;
+package edu.upenn.ajcost.SparkBatchProcess;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
