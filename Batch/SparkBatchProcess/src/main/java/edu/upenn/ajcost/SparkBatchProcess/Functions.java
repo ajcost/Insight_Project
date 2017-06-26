@@ -24,7 +24,7 @@ import scala.collection.mutable.Map;
 
 
 public class Functions {
-	
+
 	/**
 	 * 
 	 * @param commentList : Dataset of all the comments made
@@ -42,12 +42,11 @@ public class Functions {
 			new MapFunction<Row, String>() {
 				public String call(Row row) throws Exception {
 					return row.getString(0) + " " + row.getString(1);
-			}
-		}, Encoders.STRING());
-		
+				}
+			}, Encoders.STRING());
 		edges.toJavaRDD().saveAsTextFile(destination);
 	}
-	
+
 	/**
 	 * 
 	 * @param all : Dataset representing the entire 
@@ -56,11 +55,11 @@ public class Functions {
 	 * 
 	 **/
 	public static JavaPairRDD<String, Map<String, Long>> createSubredditAdjacencies(Dataset<Row> all, SparkSession spark) {
-    	all.toDF().createOrReplaceTempView("allTable");
-    	Dataset<Row> subredditInterconnections = spark.sql("SELECT a.author as author, "
-    														+ "a.subreddit as subredditOne, "
-    														+ "b.subreddit as subredditTwo "
-    														+ "FROM allTable as a INNER JOIN allTable as b "
+		all.toDF().createOrReplaceTempView("allTable");
+		Dataset<Row> subredditInterconnections = spark.sql("SELECT a.author as author, "
+															+ "a.subreddit as subredditOne, "
+															+ "b.subreddit as subredditTwo "
+															+ "FROM allTable as a INNER JOIN allTable as b "
     														+ "ON a.author = b.author AND a.subreddit < b.subreddit");
     	
     	subredditInterconnections = subredditInterconnections.drop("author");

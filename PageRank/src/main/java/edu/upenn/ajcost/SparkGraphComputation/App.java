@@ -10,7 +10,7 @@ package edu.upenn.ajcost.SparkGraphComputation;
 *               not registered as 0 and therefore do not affect the
 *               ultimate PageRank calculation.
 *
-* File Structure: 
+* File Structure:
 * [username]  [neighbor username]
 *
 ******************************/
@@ -70,11 +70,11 @@ public final class App {
   *
   **/
   public static Dataset<Row> calculatePageRank(String filename, SparkSession spark, int repetitions, String monthString) {
-		JavaRDD<String> lines = spark.read().textFile(filename).javaRDD();
+  	JavaRDD<String> lines = spark.read().textFile(filename).javaRDD();
+  	// Loads all URLs from input file and initialize their neighbors.
 
-		// Loads all URLs from input file and initialize their neighbors.
-		JavaPairRDD<String, Iterable<String>> links = lines.mapToPair(s -> {
-			String[] parts = SPACES.split(s);
+  	JavaPairRDD<String, Iterable<String>> links = lines.mapToPair(s -> {
+  		String[] parts = SPACES.split(s);
 			return new Tuple2<>(parts[0], parts[1]);
 		}).distinct().groupByKey().cache();
 

@@ -34,7 +34,6 @@ import scala.collection.JavaConversions;
 import scala.collection.mutable.Map;
 
 public class App {
-
     /**
     *
     * Description : Writes JavaPair Rdd to Cassandra
@@ -44,24 +43,24 @@ public class App {
     * @adjacencies JavaPairRDD<String, Map<String, Long>> : adjacency list represented as JavaPairRDD
     *
     **/
-	public static void writeToCassandra(CassandraConnector connector, String tableName, 
-			JavaPairRDD<String, Map<String, Long>> adjacencies) {
-		
-		// Convert to Java Map
-    	JavaPairRDD<String, MapStringLong> javaAdj = adjacencies.mapToPair(
-    			new PairFunction<Tuple2<String,Map<String,Long>>, String, MapStringLong>() {
-					public Tuple2<String, MapStringLong> call(Tuple2<String, Map<String, Long>> t) {
-						return new Tuple2(t._1, JavaConversions.mutableMapAsJavaMap(t._2));
-					}		
-    			});
+    public static void writeToCassandra(CassandraConnector connector, String tableName, 
+        JavaPairRDD<String, Map<String, Long>> adjacencies) {
+
+        // Convert to Java Map
+        JavaPairRDD<String, MapStringLong> javaAdj = adjacencies.mapToPair(
+            new PairFunction<Tuple2<String,Map<String,Long>>, String, MapStringLong>() {
+                public Tuple2<String, MapStringLong> call(Tuple2<String, Map<String, Long>> t) {
+                    return new Tuple2(t._1, JavaConversions.mutableMapAsJavaMap(t._2));
+                }		
+            });
 
         // Create new table in Cassandra then write
-		try (Session session = connector.openSession()) {
-			session.execute("CREATE TABLE reddit." + tableName + "(name TEXT PRIMARY KEY, adj map<TEXT, BIGINT> )");
-		}
-		CassandraJavaUtil.javaFunctions(javaAdj).writerBuilder("reddit", tableName, 
-				CassandraJavaUtil.mapTupleToRow(String.class, MapStringLong.class)).saveToCassandra();
-	}
+        try (Session session = connector.openSession()) {
+            session.execute("CREATE TABLE reddit." + tableName + "(name TEXT PRIMARY KEY, adj map<TEXT, BIGINT> )");
+        }
+        CassandraJavaUtil.javaFunctions(javaAdj).writerBuilder("reddit", tableName, 
+            CassandraJavaUtil.mapTupleToRow(String.class, MapStringLong.class)).saveToCassandra();
+    }
 
     /**
     *
@@ -75,31 +74,30 @@ public class App {
     *
     **/
     public static void main(String[] args) {
-    	// Configure and Start Spark Session
-    	SparkSession spark = SparkSession
-    			.builder()
-       			.appName("DataAnalytics")
-       			.config("spark.cassandra.connection.host", args[5])
-    			.getOrCreate();
-    	
-    	String submissionPath = args[0];
-    	String commentPath = args[1];
-    	String edgeListPath = args[2];
-    	String tableName = args[3] + "_" + args[4];
-    	
-    	Dataset<Row> postList =  spark.read().parquet(submissionPath);
-    	Dataset<Row> commentList = spark.read().parquet(commentPath);    	
-    	
-    	Functions.createUserEdgeList(commentList, postList, edgeListPath);
-    	
-    	Dataset<Row> all = postList.drop("id").union(commentList.drop("id"));
-    	JavaPairRDD<String, Map<String, Long>> subredditAdjacencies = Functions.createSubredditAdjacencies(all, spark);
-    	JavaPairRDD<String, Map<String, Long>> userAdjacencies = Functions.getUserSubredditPosts(all, spark);
+        // Configure and Start Spark Session
+        SparkSession spark = SparkSession
+                .builder()
+                .appName("DataAnalytics")
+                .config("spark.cassandra.connection.host", args[5])
+                .getOrCreate();
         
+        String submissionPath = args[0];
+        String commentPath = args[1];
+        String edgeListPath = args[2];
+        String tableName = args[3] + "_" + args[4];
+
+        Dataset<Row> postList =  spark.read().parquet(submissionPath);
+        Dataset<Row> commentList = spark.read().parquet(commentPath);
+
+        Functions.createUserEdgeList(commentList, postList, edgeListPath);
+
+        Dataset<Row> all = postList.drop("id").union(commentList.drop("id"));
+        JavaPairRDD<String, Map<String, Long>> subredditAdjacencies = Functions.createSubredditAdjacencies(all, spark);
+        JavaPairRDD<String, Map<String, Long>> userAdjacencies = Functions.getUserSubredditPosts(all, spark);
+
         // Write both subreddit adjacency list and user subreddit preference list
-    	CassandraConnector connector = CassandraConnector.apply(spark.sparkContext().getConf());
-    	writeToCassandra(connector, "subs_" + tableName, subredditAdjacencies);
-    	writeToCassandra(connector, "users_" + tableName, userAdjacencies);
-    	
+        CassandraConnector connector = CassandraConnector.apply(spark.sparkContext().getConf());
+        writeToCassandra(connector, "subs_" + tableName, subredditAdjacencies);
+        writeToCassandra(connector, "users_" + tableName, userAdjacencies);
     }
 }
