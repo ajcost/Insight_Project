@@ -5,8 +5,8 @@ package edu.upenn.ajcost.SparkBatchProcess;
 * @author adamcostarino
 *
 * Description : This interface extends a parametrized Java Map util
-* 				this allows for parametrized Map object to be written
-*				to Cassandra.
+*               this allows for parametrized Map object to be written
+*               to Cassandra.
 *
 *
 ******************************/
