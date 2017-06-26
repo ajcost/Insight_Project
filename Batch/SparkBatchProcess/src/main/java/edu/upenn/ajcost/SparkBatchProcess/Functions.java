@@ -67,15 +67,15 @@ public class Functions {
 		subredditInterconnections.select("subredditOne", "subredditTwo").toJavaRDD().mapToPair(input ->
 			new Tuple2<Tuple2<String, String>, Long>(
 				(new Tuple2<String, String>(input.getString(0), input.getString(1))), (long) 1));
-		
-    	// Count intersections then union for all permutations
+
+		// Count intersections then union for all permutations
 		mappedInterconnections = mappedInterconnections.reduceByKey((a, b) -> a + b);
 		JavaPairRDD<Tuple2<String, String>, Long> mappedInterconnectionsTwo = mappedInterconnections.mapToPair(input ->
 			new Tuple2<Tuple2<String, String>, Long>(new Tuple2<String, String>(input._1._2, input._1._1), input._2));
 		JavaPairRDD<Tuple2<String, String>, Long> allAdjacencies = mappedInterconnections.union(mappedInterconnectionsTwo);
-		
-		
-    	// Insert List as second element in Pair RDD
+
+
+		// Insert List as second element in Pair RDD
 		@SuppressWarnings("serial")
 		JavaPairRDD<String, Map<String, Long>> newAdjacencies = allAdjacencies.mapToPair(
 			new PairFunction<Tuple2<Tuple2<String, String>,Long>, String, Map<String, Long>>() {
@@ -124,7 +124,7 @@ public class Functions {
 					return new Tuple2<String, Map<String, Long>>(val._1._1, temp);
 				}
 			});
-		
+
 		// Add all Lists together to get the full adjacency list for user posts
 		@SuppressWarnings("serial")
 		JavaPairRDD<String, Map<String, Long>> finalTable = newMapped.reduceByKey(
@@ -135,7 +135,6 @@ public class Functions {
 					return one;
 				}
 			});
-
 		return finalTable;
 	}
 }
