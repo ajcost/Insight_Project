@@ -70,20 +70,19 @@ public final class App {
   *
   **/
   public static Dataset<Row> calculatePageRank(String filename, SparkSession spark, int repetitions, String monthString) {
-  	JavaRDD<String> lines = spark.read().textFile(filename).javaRDD();
-  	// Loads all URLs from input file and initialize their neighbors.
 
+    // Load edgelist file
+  	JavaRDD<String> lines = spark.read().textFile(filename).javaRDD();
   	JavaPairRDD<String, Iterable<String>> links = lines.mapToPair(s -> {
   		String[] parts = SPACES.split(s);
 			return new Tuple2<>(parts[0], parts[1]);
 		}).distinct().groupByKey().cache();
 
-		// Loads all URLs with other URL(s) link to from input file and
-		// initialize ranks of them to one.
+    // Initialize unitary PageRank
 		JavaPairRDD<String, Double> ranks = links.mapValues(rs -> 1.0);
 
+    // Calculate contributions
 		for (int current = 0; current < repetitions; current++) {
-			// Calculates URL contributions to the rank of other URLs.
 			JavaPairRDD<String, Double> contribs = links.join(ranks).values().flatMapToPair(s -> {
 				int usersCount = Iterables.size(s._1());
 				List<Tuple2<String, Double>> results = new ArrayList<>();
