@@ -22,7 +22,7 @@ about 40 million user interactions per month and on average since 2006 there hav
 every month. 
 
 ### Pipeline
-![alt text](https://raw.githubusercontent.com/ajcost/Insight_Project/FinalPipeline_plusFrontend.png)
+![alt text](https://raw.githubusercontent.com/ajcost/Insight_Project/blob/master/FinalPipeline_plusFrontend.png)
 
 The raw data exists on S3 initially and it was stored there using the shell script in the `ToS3` directory. The raw JSON on s3 is 
 pulled into Spark where feature extraction occurs and unimportant data is dropped, the final datasets are pushed to HDFS with parquet 
