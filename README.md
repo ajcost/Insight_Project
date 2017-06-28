@@ -21,74 +21,13 @@ The size of the total raw JSON data is 2.5 TB, the data is grouped in monthly ba
 about 40 million user interactions per month and on average since 2006 there have been 22 million user interactions
 every month. 
 
-### Installing
+### Pipeline
+![alt text](https://raw.githubusercontent.com/ajcost/Insight_Project/FinalPipeline_plusFrontend.png)
 
-A step by step series of examples that tell you have to get a development env running
-
-Say what the step will be
-
-```
-Give the example
-```
-
-And repeat
-
-```
-until finished
-```
-
-End with an example of getting some data out of the system or using it for a little demo
-
-## Running the tests
-
-Explain how to run the automated tests for this system
-
-### Break down into end to end tests
-
-Explain what these tests test and why
-
-```
-Give an example
-```
-
-### And coding style tests
-
-Explain what these tests test and why
-
-```
-Give an example
-```
-
-## Deployment
-
-Add additional notes about how to deploy this on a live system
-
-## Built With
-
-* [Dropwizard](http://www.dropwizard.io/1.0.2/docs/) - The web framework used
-* [Maven](https://maven.apache.org/) - Dependency Management
-* [ROME](https://rometools.github.io/rome/) - Used to generate RSS Feeds
-
-## Contributing
-
-Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c63ec426) for details on our code of conduct, and the process for submitting pull requests to us.
-
-## Versioning
-
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/your/project/tags). 
-
-## Authors
-
-* **Billie Thompson** - *Initial work* - [PurpleBooth](https://github.com/PurpleBooth)
-
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
-
-## Acknowledgments
-
-* Hat tip to anyone who's code was used
-* Inspiration
-* etc
+The raw data exists on S3 initially and it was stored there using the shell script in the `ToS3` directory. The raw JSON on s3 is 
+pulled into Spark where feature extraction occurs and unimportant data is dropped, the final datasets are pushed to HDFS with parquet 
+file format. Parquet is a columnar storage format, it allows for easy compressability. In this case the extracted Reddit data
+compressed to parquet with a 50 to 1 compression ratio. This allows for the Spark Batch Process to quickly read from the parquet files
+and perform the batch processes on large datasets without much latency. The Spark Batch process then creates the user and subreddit graphs
+performs a incremental PageRank calculation on the user graph and calculates the intersections of the subreddit graphs. The data is
+written to Cassandra, a high performance key-value distributed database. There is a Flask webapp that allows users to explore the data.
