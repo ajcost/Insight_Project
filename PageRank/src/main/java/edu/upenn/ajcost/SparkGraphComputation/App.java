@@ -41,7 +41,7 @@ import scala.collection.JavaConversions;
 
 
 public final class App {
-  private static final Pattern SPACES = Pattern.compile("\\s+");
+  private static final Pattern SPACE = Pattern.compile("\\s+");
 
   /**
   *
@@ -69,21 +69,21 @@ public final class App {
   * @monthString String : represents what the column will be called
   *
   **/
-  public static Dataset<Row> calculatePageRank(String filename, SparkSession spark, int repetitions, String monthString) {
+  public static Dataset<Row> calculatePageRank(String filename, SparkSession spark, int totalRepetitions, String monthString) {
 
     // Load edgelist file
   	JavaRDD<String> lines = spark.read().textFile(filename).javaRDD();
   	JavaPairRDD<String, Iterable<String>> links = lines.mapToPair(s -> {
-  		String[] parts = SPACES.split(s);
+  		String[] parts = SPACE.split(s);
      return new Tuple2<>(parts[0], parts[1]);
-   }).distinct().groupByKey().cache();
+   }).groupByKey();
 
     // Initialize unitary PageRank
     JavaPairRDD<String, Double> ranks = links.mapValues(rs -> 1.0);
 
     // Calculate contributions
-    for (int current = 0; current < repetitions; current++) {
-     JavaPairRDD<String, Double> contribs = links.join(ranks).values().flatMapToPair(s -> {
+    for (int rep = 0; rep < totalRepetitions; rep++) {
+     JavaPairRDD<String, Double> contributions = links.join(ranks).values().flatMapToPair(s -> {
       int usersCount = Iterables.size(s._1());
       List<Tuple2<String, Double>> results = new ArrayList<>();
       for (String n : s._1) {
@@ -91,9 +91,8 @@ public final class App {
      }
      return results.iterator();
    });
-
-			// Re-calculates URL ranks based on neighbor contributions.
-     ranks = contribs.reduceByKey(new Sum()).mapValues(sum -> 0.15 + sum * 0.85);
+			// Re-calculates ranks based on adacent node contributions.
+     ranks = contributions.reduceByKey(new Sum()).mapValues(sum -> 0.15 + sum * 0.85);
      
    }
    
