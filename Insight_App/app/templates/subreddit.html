@@ -15,25 +15,31 @@
 	</head>
 	<body>
 		<div class="container">
+			<div class="codrops-top clearfix">
+				<a class="codrops-icon codrops-icon-prev" href="/index"><span> Back to PageRank Search </span></a>
+			</div>
 			<header>
-				<h1> Reddit Rank <span>Search A PageRank</span></h1>
+				<h1> Reddit Rank <span>Search For A Subreddit</span></h1>
 			</header>
 			<div class="main clearfix">
 				<!-- Optional columns for small components -->
-				<div class="column" style="width:575px; margin:0 auto;">
+				<div class="column" style="width:800px; margin:0 auto;">
 					<div id="sb-search" class="sb-search">
-						<form action="/index" method="post">
-							<input class="sb-search-input" placeholder="Enter your search term..." type="text" value="" name="search" id="search">
+						<form action="/subreddit" method="post">
+							<input class="sb-search-input" placeholder="Enter your search term..." type="text" value="" name="search_subreddit" id="search_subreddit">
 							<input class="sb-search-submit" type="submit" value="">
 							<span class="sb-icon-search"></span>
 						</form>
 					</div>
-          <div class="column" style="width:575px; margin:0 auto;">
-            <ul class=entries>
-            {% for user in user_list %}
-            <li><h2>{{ user.name }}</h2>{{ user.string_out() }}
+          <div class="column" style="width:800px; margin:0 auto;">
+            <ul class=entries style="list-style-type:none">
+            {% for subreddit in subreddit_list %}
+            <li><h2>{{ subreddit.name }}</h2>
+            	{% for adj in subreddit.get_similar()[:30] %}
+            		{{ adj }} <br />
+            	{% endfor %}
             {% else %}
-            <li><em> Unbelievable.  No entries here so far</em>
+            <li><em>No Searches Have Been Made</em>
             {% endfor %}
             </ul>
           </div>
