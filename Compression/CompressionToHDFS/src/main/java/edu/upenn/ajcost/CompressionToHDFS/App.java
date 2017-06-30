@@ -16,16 +16,16 @@ import org.apache.spark.sql.functions;
 import org.apache.spark.storage.StorageLevel;
 
 public class App {
-	
-	/**
-	 * 
-	 * @param spark : The current spark session that is running
-	 * @param submissionFilePath : String that represents the path to the file on S3
-	 * @param input : String that was input on the command line
-	 * @param locationPrefix : The HDFS location
-	 * 
-	 **/
-	public static void writePoststoHDFS(SparkSession spark, Dataset<Row> listData, String input, String locationPrefix) {
+    
+    /**
+     * 
+     * @param spark : The current spark session that is running
+     * @param submissionFilePath : String that represents the path to the file on S3
+     * @param input : String that was input on the command line
+     * @param locationPrefix : The HDFS location
+     * 
+     **/
+    public static void writePoststoHDFS(SparkSession spark, Dataset<Row> listData, String input, String locationPrefix) {
        Dataset<Row> list = listData.toDF();
        list = list.toDF().filter(functions.col("author").notEqual("[deleted]"));
        list.write().parquet(locationPrefix + input + ".parquet");
@@ -34,7 +34,7 @@ public class App {
    
    public static void main(String[] args) {
       
-    	// Configure and Start Spark Session
+        // Configure and Start Spark Session
        SparkSession spark = SparkSession
        .builder()
        .appName("CompressionToHDFS")

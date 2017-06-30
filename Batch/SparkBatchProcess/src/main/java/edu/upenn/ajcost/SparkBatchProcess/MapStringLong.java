@@ -14,5 +14,5 @@ package edu.upenn.ajcost.SparkBatchProcess;
 import java.util.Map;
 
 public interface MapStringLong extends Map<String, Long> {
-	
+    
 }

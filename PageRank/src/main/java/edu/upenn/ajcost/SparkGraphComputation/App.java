@@ -42,22 +42,6 @@ import scala.collection.JavaConversions;
 
 public final class App {
   private static final Pattern SPACE = Pattern.compile("\\s+");
-
-  /**
-  *
-  * Description : Static method that takes two Doubles and returns the sum
-  *
-  * @a Double : Value to be added
-  * @b Double : Value to be added
-  * @return Double : the sum of the inputs
-  *
-  **/
-  private static class Sum implements Function2<Double, Double, Double> {
-    @Override
-    public Double call(Double a, Double b) {
-      return a + b;
-    }
-  }
   
   /**
   *
@@ -72,9 +56,9 @@ public final class App {
   public static Dataset<Row> calculatePageRank(String filename, SparkSession spark, int totalRepetitions, String monthString) {
 
     // Load edgelist file
-  	JavaRDD<String> lines = spark.read().textFile(filename).javaRDD();
-  	JavaPairRDD<String, Iterable<String>> links = lines.mapToPair(s -> {
-  		String[] parts = SPACE.split(s);
+    JavaRDD<String> lines = spark.read().textFile(filename).javaRDD();
+    JavaPairRDD<String, Iterable<String>> links = lines.mapToPair(s -> {
+        String[] parts = SPACE.split(s);
      return new Tuple2<>(parts[0], parts[1]);
    }).groupByKey();
 
@@ -91,12 +75,16 @@ public final class App {
      }
      return results.iterator();
    });
-			// Re-calculates ranks based on adacent node contributions.
-     ranks = contributions.reduceByKey(new Sum()).mapValues(sum -> 0.15 + sum * 0.85);
-     
-   }
+            // Re-calculates ranks based on adacent node contributions.
+     ranks = contributions.reduceByKey(
+        new Function2<Double, Double, Double>() {
+                @Override
+                public Double call(Double a, Double b) {
+                return a + b;
+            }
+        }).mapValues(sum -> 0.15 + sum * 0.85); 
    
-		// Programatically specify the schema
+        // Programatically specify the schema
    List<StructField> fields = new ArrayList<>();
    StructField nameField = DataTypes.createStructField("name", DataTypes.StringType, true);
    fields.add(nameField);
@@ -107,7 +95,7 @@ public final class App {
    
    JavaRDD<Row> rowRanksRDD = ranks.map(tuple -> RowFactory.create(tuple._1, tuple._2));
    Dataset<Row> ranksDF = spark.sqlContext().createDataFrame(rowRanksRDD, schema);
-   return ranksDF;	
+   return ranksDF;  
  }
  
   /**

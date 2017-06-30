@@ -76,10 +76,10 @@ public class App {
     public static void main(String[] args) {
         // Configure and Start Spark Session
         SparkSession spark = SparkSession
-                .builder()
-                .appName("DataAnalytics")
-                .config("spark.cassandra.connection.host", args[5])
-                .getOrCreate();
+        .builder()
+        .appName("DataAnalytics")
+        .config("spark.cassandra.connection.host", args[5])
+        .getOrCreate();
         
         String submissionPath = args[0];
         String commentPath = args[1];
