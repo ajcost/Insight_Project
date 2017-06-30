@@ -1,6 +1,7 @@
 # Reddit Rank
 
 Creating user graphs to map user influence and subreddit graph to analyze similar subreddits.
+[Project Presentation](https://www.slideshare.net/AdamCostarino/insight-presentation-77400185)
 
 ## Motivations
 
