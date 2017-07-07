@@ -71,12 +71,13 @@ public final class App {
       int usersCount = Iterables.size(s._1());
       List<Tuple2<String, Double>> results = new ArrayList<>();
       for (String n : s._1) {
-       results.add(new Tuple2<>(n, s._2() / usersCount));
+       results.add(new Tuple2<String,Double>(n, s._2() / usersCount));
      }
      return results.iterator();
    });
-            // Re-calculates ranks based on adacent node contributions.
-     ranks = contributions.reduceByKey(
+
+    // Re-calculates ranks based on adacent node contributions.
+    ranks = contributions.reduceByKey(
         new Function2<Double, Double, Double>() {
                 @Override
                 public Double call(Double a, Double b) {
@@ -84,18 +85,17 @@ public final class App {
             }
         }).mapValues(sum -> 0.15 + sum * 0.85); 
    
-        // Programatically specify the schema
-   List<StructField> fields = new ArrayList<>();
-   StructField nameField = DataTypes.createStructField("name", DataTypes.StringType, true);
-   fields.add(nameField);
-   StructField pagerankField = DataTypes.createStructField("month_" + monthString, DataTypes.DoubleType, true);
-   fields.add(pagerankField);
-   StructType schema = DataTypes.createStructType(fields);
+    // Programatically specify the schema
+    List<StructField> fields = new ArrayList<>();
+    StructField nameField = DataTypes.createStructField("name", DataTypes.StringType, true);
+    fields.add(nameField);
+    StructField pagerankField = DataTypes.createStructField("month_" + monthString, DataTypes.DoubleType, true);
+    fields.add(pagerankField);
+    StructType schema = DataTypes.createStructType(fields);
    
-   
-   JavaRDD<Row> rowRanksRDD = ranks.map(tuple -> RowFactory.create(tuple._1, tuple._2));
-   Dataset<Row> ranksDF = spark.sqlContext().createDataFrame(rowRanksRDD, schema);
-   return ranksDF;  
+    JavaRDD<Row> rowRanksRDD = ranks.map(tuple -> RowFactory.create(tuple._1, tuple._2));
+    Dataset<Row> ranksDF = spark.sqlContext().createDataFrame(rowRanksRDD, schema);
+    return ranksDF;  
  }
  
   /**
