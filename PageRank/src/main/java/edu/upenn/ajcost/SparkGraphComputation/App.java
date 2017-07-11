@@ -47,10 +47,10 @@ public final class App {
   *
   * Description : Peforms PageRank algorithm for a specified number of iterations
   *
-  * @filename String : the path to the input edgelist file in String representation
-  * @spark SparkSession : current SparkSession instance
-  * @repetitions Integer : the number of time the PageRank algorithm is to repeat
-  * @monthString String : represents what the column will be called
+  * @param filename String : the path to the input edgelist file in String representation
+  * @param spark SparkSession : current SparkSession instance
+  * @param repetitions Integer : the number of time the PageRank algorithm is to repeat
+  * @param monthString String : represents what the column will be called
   *
   **/
   public static Dataset<Row> calculatePageRank(String filename, SparkSession spark, int totalRepetitions, String monthString) {
@@ -102,9 +102,9 @@ public final class App {
   *
   * Description : Main
   *
-  * @args[0]-args[11] Strings : the paths to the input edgelist files in String representation
-  * @args[12] String : the year of the PageRank calculation
-  * @args[13] String : the path to the output file in String representation -> parquet file format
+  * @param args[0]-args[11] Strings : the paths to the input edgelist files in String representation
+  * @param args[12] String : the year of the PageRank calculation
+  * @param args[13] String : the path to the output file in String representation -> parquet file format
   *
   **/
   public static void main(String[] args) throws Exception {
@@ -113,12 +113,12 @@ public final class App {
     .appName("JavaPageRank")
     .getOrCreate();
     
-    Dataset<Row> pageranks = calculatePageRank(args[0], spark, 20, "0");
+    Dataset<Row> pageranks = calculatePageRank(args[0], spark, 25, "0");
     String[] columnjoins = new String[]  { "name" };
 
     // Iteratively calculate PageRanks for all twelve months in a single year
     for (int i = 1; i < 12; i++) {
-      Dataset<Row> pageranksAdd = calculatePageRank(args[i], spark, 20, i + "");
+      Dataset<Row> pageranksAdd = calculatePageRank(args[i], spark, 25, i + "");
       pageranks = pageranks.join(pageranksAdd,
        JavaConversions.asScalaBuffer(new ArrayList<String>(Arrays.asList(columnjoins))), "outer");
       pageranks.show();
